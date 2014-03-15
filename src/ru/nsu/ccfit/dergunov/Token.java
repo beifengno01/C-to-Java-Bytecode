@@ -54,6 +54,7 @@ public class Token
         CLOSEBRACE,
         NUMBER,
         NAME,
+        EQUALS,
         END
     }
 

@@ -140,6 +140,10 @@ public class Lexer
                 {
                     return closeBraceToken;
                 }
+                case '=':
+                {
+                    return equalsToken;
+                }
             }
         }
         catch (IOException ex)
@@ -218,6 +222,7 @@ public class Lexer
     private Token semicolonToken = new Token(Token.TokenType.SEMICOLON);
     private Token openBraceToken = new Token(Token.TokenType.OPENBRACE);
     private Token closeBraceToken = new Token(Token.TokenType.CLOSEBRACE);
+    private Token equalsToken = new Token(Token.TokenType.EQUALS);
     private Token endToken = new Token(Token.TokenType.END);
 
     private Buffer buffer;
