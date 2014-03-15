@@ -55,14 +55,10 @@ public class Lexer
                             buffer.getChar();
                             name.append(c);
                         }
-                        else if(c == ' ')
+                        else
                         {
                             token.setValue(name.toString());
                             return token;
-                        }
-                        else
-                        {
-                            return endToken;
                         }
                     }
                 }
@@ -92,14 +88,10 @@ public class Lexer
                             buffer.getChar();
                             number.append(c);
                         }
-                        else if(c == ' ')
+                        else
                         {
                             token.setValue(number.toString());
                             return token;
-                        }
-                        else
-                        {
-                            return endToken;
                         }
                     }
                 }
