@@ -73,6 +73,7 @@ public class Buffer
         if(readed == returned)
         {
             readed = reader.read(buf, 0, size);
+            returned = 0;
 
             if(readed == 0)
             {
