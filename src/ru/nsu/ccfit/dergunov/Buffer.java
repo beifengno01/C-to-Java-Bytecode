@@ -27,7 +27,7 @@ public class Buffer
     public Buffer(Reader r, int bufSize)
     {
         reader = r;
-        buf = new char[bufSize + 1];
+        buf = new char[bufSize];
         size = bufSize;
     }
 
@@ -49,15 +49,27 @@ public class Buffer
 
     public char pickCharTwo() throws IOException
     {
+        if(size < 2)
+        {
+            return 0;
+        }
+
         read();
 
         if(returned + 1 == readed)
         {
-            int r = reader.read(buf, size, 1);
-
-            if(r == 1)
+            buf[0] = buf[returned];
+            readed = reader.read(buf, 1, size - 1);
+            if(readed < 0)
             {
-                ++readed;
+                readed = 0;
+            }
+            ++readed;
+            returned = 0;
+
+            if(readed >= 2)
+            {
+                return buf[1];
             }
             else
             {
@@ -75,7 +87,7 @@ public class Buffer
             readed = reader.read(buf, 0, size);
             returned = 0;
 
-            if(readed == 0)
+            if(readed <= 0)
             {
                 throw new IOException();
             }
