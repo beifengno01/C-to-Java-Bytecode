@@ -1,5 +1,5 @@
 /*
- * Computer Graphics: Puzzle
+ * C to Java Bytecode
  * Copyright (C) 2014  Alexander Dergunov
  * dergunov.alexander@gmail.com
  *
