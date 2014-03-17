@@ -40,14 +40,14 @@ public class Buffer
         return buf[returned - 1];
     }
 
-    public char pickChar() throws IOException
+    public char peekChar() throws IOException
     {
         read();
 
         return buf[returned];
     }
 
-    public char pickCharTwo() throws IOException
+    public char peekCharTwo() throws IOException
     {
         if(size < 2)
         {

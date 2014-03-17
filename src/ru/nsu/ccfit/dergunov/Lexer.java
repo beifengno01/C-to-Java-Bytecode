@@ -48,7 +48,7 @@ public class Lexer
                 {
                     while(true)
                     {
-                        c = buffer.pickChar();
+                        c = buffer.peekChar();
 
                         if(Character.isAlphabetic(c) || Character.isDigit(c))
                         {
@@ -81,7 +81,7 @@ public class Lexer
                 {
                     while(true)
                     {
-                        c = buffer.pickChar();
+                        c = buffer.peekChar();
 
                         if(Character.isDigit(c))
                         {
@@ -158,7 +158,7 @@ public class Lexer
     {
         while(true)
         {
-            char c = buffer.pickChar();
+            char c = buffer.peekChar();
 
             if(c == ' ' || c == '\n' || c == '\r')
             {
@@ -168,7 +168,7 @@ public class Lexer
 
             if(c == '/')
             {
-                char n = buffer.pickCharTwo();
+                char n = buffer.peekCharTwo();
 
                 if(n == '/')
                 {
@@ -197,7 +197,7 @@ public class Lexer
 
                         if(c == '*')
                         {
-                            n = buffer.pickChar();
+                            n = buffer.peekChar();
                             if(n == '/')
                             {
                                 buffer.getChar();

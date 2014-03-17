@@ -72,33 +72,33 @@ public class BufferTest
 
         Buffer buffer = new Buffer(reader, 1);
 
-        char c = buffer.pickChar();
+        char c = buffer.peekChar();
         assertEquals(c, 'q');
         buffer.getChar();
 
-        c = buffer.pickChar();
+        c = buffer.peekChar();
         assertEquals(c, 'w');
         buffer.getChar();
 
-        c = buffer.pickChar();
+        c = buffer.peekChar();
         assertEquals(c, 'e');
         buffer.getChar();
 
-        c = buffer.pickChar();
+        c = buffer.peekChar();
         assertEquals(c, 'r');
         buffer.getChar();
 
-        c = buffer.pickChar();
+        c = buffer.peekChar();
         assertEquals(c, 't');
         buffer.getChar();
 
-        c = buffer.pickChar();
+        c = buffer.peekChar();
         assertEquals(c, 'y');
         buffer.getChar();
 
         try
         {
-            buffer.pickChar();
+            buffer.peekChar();
             assertEquals(true, false);
         }
         catch (IOException ex)
@@ -114,33 +114,33 @@ public class BufferTest
 
         Buffer buffer = new Buffer(reader, 2);
 
-        char c = buffer.pickCharTwo();
+        char c = buffer.peekCharTwo();
         assertEquals(c, 'w');
         buffer.getChar();
 
-        c = buffer.pickCharTwo();
+        c = buffer.peekCharTwo();
         assertEquals(c, 'e');
         buffer.getChar();
 
-        c = buffer.pickCharTwo();
+        c = buffer.peekCharTwo();
         assertEquals(c, 'r');
         buffer.getChar();
 
-        c = buffer.pickCharTwo();
+        c = buffer.peekCharTwo();
         assertEquals(c, 't');
         buffer.getChar();
 
-        c = buffer.pickCharTwo();
+        c = buffer.peekCharTwo();
         assertEquals(c, 'y');
         buffer.getChar();
 
-        c = buffer.pickCharTwo();
+        c = buffer.peekCharTwo();
         assertEquals(c, 0);
         buffer.getChar();
 
         try
         {
-            buffer.pickCharTwo();
+            buffer.peekCharTwo();
             assertEquals(true, false);
         }
         catch(IOException ex)
