@@ -55,6 +55,8 @@ public class Token
         NUMBER,
         NAME,
         EQUALS,
+        RETURN,
+        INT,
         END
     }
 

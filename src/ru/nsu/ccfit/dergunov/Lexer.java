@@ -38,8 +38,6 @@ public class Lexer
 
             if(Character.isAlphabetic(c))
             {
-                Token token = new Token(Token.TokenType.NAME);
-
                 StringBuilder name = new StringBuilder();
 
                 name.append(c);
@@ -57,13 +55,26 @@ public class Lexer
                         }
                         else
                         {
-                            token.setValue(name.toString());
-                            return token;
+                            break;
                         }
                     }
                 }
                 catch(IOException ex)
                 {
+
+                }
+
+                if(name.toString().equals("return"))
+                {
+                    return returnToken;
+                }
+                else if(name.toString().equals("int"))
+                {
+                    return intToken;
+                }
+                else
+                {
+                    Token token = new Token(Token.TokenType.NAME);
                     token.setValue(name.toString());
                     return token;
                 }
@@ -223,6 +234,8 @@ public class Lexer
     private Token openBraceToken = new Token(Token.TokenType.OPENBRACE);
     private Token closeBraceToken = new Token(Token.TokenType.CLOSEBRACE);
     private Token equalsToken = new Token(Token.TokenType.EQUALS);
+    private Token returnToken = new Token(Token.TokenType.RETURN);
+    private Token intToken = new Token(Token.TokenType.INT);
     private Token endToken = new Token(Token.TokenType.END);
 
     private Buffer buffer;

@@ -46,8 +46,7 @@ public class LexerTest
         Token token;
 
         token = lexer.getToken();
-        assertEquals(Token.TokenType.NAME ,token.getTokenType());
-        assertEquals("int" ,token.getValue());
+        assertEquals(Token.TokenType.INT ,token.getTokenType());
 
         token = lexer.getToken();
         assertEquals(Token.TokenType.NAME ,token.getTokenType());
@@ -63,8 +62,7 @@ public class LexerTest
         assertEquals(Token.TokenType.OPENBRACE ,token.getTokenType());
 
         token = lexer.getToken();
-        assertEquals(Token.TokenType.NAME ,token.getTokenType());
-        assertEquals("int" ,token.getValue());
+        assertEquals(Token.TokenType.INT ,token.getTokenType());
 
         token = lexer.getToken();
         assertEquals(Token.TokenType.NAME ,token.getTokenType());
@@ -81,8 +79,7 @@ public class LexerTest
         assertEquals(Token.TokenType.SEMICOLON ,token.getTokenType());
 
         token = lexer.getToken();
-        assertEquals(Token.TokenType.NAME ,token.getTokenType());
-        assertEquals("int" ,token.getValue());
+        assertEquals(Token.TokenType.INT ,token.getTokenType());
 
         token = lexer.getToken();
         assertEquals(Token.TokenType.NAME ,token.getTokenType());
@@ -141,8 +138,7 @@ public class LexerTest
         assertEquals(Token.TokenType.SEMICOLON ,token.getTokenType());
 
         token = lexer.getToken();
-        assertEquals(Token.TokenType.NAME ,token.getTokenType());
-        assertEquals("return" ,token.getValue());
+        assertEquals(Token.TokenType.RETURN ,token.getTokenType());
 
         token = lexer.getToken();
         assertEquals(Token.TokenType.NUMBER ,token.getTokenType());
