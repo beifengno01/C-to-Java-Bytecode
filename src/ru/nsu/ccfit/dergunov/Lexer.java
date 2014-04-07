@@ -101,16 +101,17 @@ public class Lexer
                         }
                         else
                         {
-                            token.setValue(number.toString());
-                            return token;
+                            break;
                         }
                     }
                 }
                 catch(IOException ex)
                 {
-                    token.setValue(number.toString());
-                    return token;
+
                 }
+
+                token.setValue(number.toString());
+                return token;
             }
 
             switch (c)
