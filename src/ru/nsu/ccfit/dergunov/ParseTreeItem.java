@@ -19,49 +19,30 @@
 
 package ru.nsu.ccfit.dergunov;
 
-public class Token
+import java.util.ArrayList;
+
+public class ParseTreeItem
 {
-    public Token(TokenType tokenType)
-    {
-        type = tokenType;
-    }
+    public ParseTreeItemType type;
+    public String value;
+    public ArrayList<ParseTreeItem> childrens = new ArrayList<>();
 
-    public void setValue(String v)
+    public enum ParseTreeItemType
     {
-        value = v;
-    }
-
-    public String getValue()
-    {
-        return value;
-    }
-
-    public TokenType getTokenType()
-    {
-        return type;
-    }
-
-    public enum TokenType
-    {
-        COMMA,
-        OPENBRACKET,
-        CLOSEBRACKET,
+        PROGRAM,
+        METHOD,
+        TYPE,
+        ARGLIST,
+        BODY,
+        DEFINE,
+        INITIALIZE,
+        PRINT,
+        RETURN,
         MULTIPLICATION,
         DIVISION,
         PLUS,
         MINUS,
-        SEMICOLON,
-        OPENBRACE,
-        CLOSEBRACE,
         NUMBER,
-        NAME,
-        EQUALS,
-        PRINT,
-        RETURN,
-        INT,
-        END
+        NAME
     }
-
-    private TokenType type;
-    private String value;
 }

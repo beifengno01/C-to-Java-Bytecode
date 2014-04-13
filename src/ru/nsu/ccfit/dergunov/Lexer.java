@@ -64,7 +64,11 @@ public class Lexer
 
                 }
 
-                if(name.toString().equals("return"))
+                if(name.toString().equals("print"))
+                {
+                    return printToken;
+                }
+                else if(name.toString().equals("return"))
                 {
                     return returnToken;
                 }
@@ -116,6 +120,10 @@ public class Lexer
 
             switch (c)
             {
+                case ',':
+                {
+                    return commaToken;
+                }
                 case '(':
                 {
                     return openBracketToken;
@@ -225,6 +233,7 @@ public class Lexer
         }
     }
 
+    private Token commaToken = new Token(Token.TokenType.COMMA);
     private Token openBracketToken = new Token(Token.TokenType.OPENBRACKET);
     private Token closeBracketToken = new Token(Token.TokenType.CLOSEBRACKET);
     private Token multiplicationToken = new Token(Token.TokenType.MULTIPLICATION);
@@ -235,6 +244,7 @@ public class Lexer
     private Token openBraceToken = new Token(Token.TokenType.OPENBRACE);
     private Token closeBraceToken = new Token(Token.TokenType.CLOSEBRACE);
     private Token equalsToken = new Token(Token.TokenType.EQUALS);
+    private Token printToken = new Token(Token.TokenType.PRINT);
     private Token returnToken = new Token(Token.TokenType.RETURN);
     private Token intToken = new Token(Token.TokenType.INT);
     private Token endToken = new Token(Token.TokenType.END);
