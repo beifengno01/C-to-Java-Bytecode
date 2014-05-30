@@ -76,6 +76,14 @@ public class Lexer
                 {
                     return intToken;
                 }
+                else if(name.toString().equals("double"))
+                {
+                    return doubleToken;
+                }
+                else if(name.toString().equals("void"))
+                {
+                    return voidToken;
+                }
                 else
                 {
                     Token token = new Token(Token.TokenType.NAME);
@@ -247,6 +255,8 @@ public class Lexer
     private Token printToken = new Token(Token.TokenType.PRINT);
     private Token returnToken = new Token(Token.TokenType.RETURN);
     private Token intToken = new Token(Token.TokenType.INT);
+    private Token doubleToken = new Token(Token.TokenType.DOUBLE);
+    private Token voidToken = new Token(Token.TokenType.VOID);
     private Token endToken = new Token(Token.TokenType.END);
 
     private Buffer buffer;

@@ -135,8 +135,12 @@ public class Parser
 
                 lastToken = lexer.getToken();
 
-                item.childrens.add(itemType);
-                item.childrens.add(itemName);
+                ParseTreeItem defineItem = new ParseTreeItem();
+                defineItem.type = ParseTreeItem.ParseTreeItemType.DEFINE;
+                defineItem.childrens.add(itemType);
+                defineItem.childrens.add(itemName);
+
+                item.childrens.add(defineItem);
             }
             else
             {
@@ -222,12 +226,7 @@ public class Parser
             if(lastToken.getTokenType() == Token.TokenType.NAME)
             {
                 item.type = ParseTreeItem.ParseTreeItemType.INITIALIZE;
-
-                ParseTreeItem itemName = new ParseTreeItem();
-                itemName.type = ParseTreeItem.ParseTreeItemType.NAME;
-                itemName.value = lastToken.getValue();
-
-                item.childrens.add(itemName);
+                item.value = lastToken.getValue();
 
                 lastToken = lexer.getToken();
 
@@ -298,10 +297,6 @@ public class Parser
                         {
                             item.childrens.add(itemExpr);
                         }
-                        else
-                        {
-                            throw new Exception();
-                        }
                     }
                     else
                     {
@@ -316,23 +311,34 @@ public class Parser
 
     public ParseTreeItem parseType() throws Exception
     {
+        ParseTreeItem item = new ParseTreeItem();
+        item.type = ParseTreeItem.ParseTreeItemType.TYPE;
+
         switch(lastToken.getTokenType())
         {
             case INT:
             {
-                lastToken = lexer.getToken();
-
-                ParseTreeItem item = new ParseTreeItem();
-                item.type = ParseTreeItem.ParseTreeItemType.TYPE;
                 item.value = "int";
-
-                return item;
+                break;
+            }
+            case DOUBLE:
+            {
+                item.value = "double";
+                break;
+            }
+            case VOID:
+            {
+                item.value = "void";
+                break;
             }
             default:
             {
                 return null;
             }
         }
+
+        lastToken = lexer.getToken();
+        return item;
     }
 
     private ParseTreeItem parseExpression() throws Exception

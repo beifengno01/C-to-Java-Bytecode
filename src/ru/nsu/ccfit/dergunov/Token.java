@@ -59,6 +59,8 @@ public class Token
         PRINT,
         RETURN,
         INT,
+        DOUBLE,
+        VOID,
         END
     }
 
