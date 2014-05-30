@@ -43,6 +43,7 @@ public class ParseTreeItem
         PLUS,
         MINUS,
         NUMBER,
-        NAME
+        NAME,
+        FUNCTION
     }
 }

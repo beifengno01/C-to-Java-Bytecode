@@ -40,14 +40,59 @@ public class ASCIICreator
     {
         for(ParseTreeItem method : item.childrens)
         {
+            Method m = new Method();
+            m.type = "";
+            m.args = "";
+
+            if(method.value.equals("main"))
+            {
+                m.args = "[Ljava/lang/String;";
+            }
+
             for(ParseTreeItem it : method.childrens)
             {
                 if(it.type == ParseTreeItem.ParseTreeItemType.TYPE)
                 {
-                    methodType.put(method.value, getShortType(it.value));
-                    break;
+                    if(method.value.equals("main"))
+                    {
+                        m.type = "V";
+                    }
+                    else
+                    {
+                        m.type = getShortType(it.value);
+                    }
+                }
+                if(it.type == ParseTreeItem.ParseTreeItemType.ARGLIST && !method.value.equals("main"))
+                {
+                    for(ParseTreeItem arg : it.childrens)
+                    {
+                        if(arg.type == ParseTreeItem.ParseTreeItemType.DEFINE)
+                        {
+                            if(arg.childrens.size() == 2
+                                    && arg.childrens.get(0).type == ParseTreeItem.ParseTreeItemType.TYPE
+                                    && arg.childrens.get(1).type == ParseTreeItem.ParseTreeItemType.NAME)
+                            {
+                                m.args = m.args + getShortType(arg.childrens.get(0).value);
+                            }
+                            else
+                            {
+                                throw new Exception("WRONG ARG LIST");
+                            }
+                        }
+                        else
+                        {
+                            throw new Exception("WRONG ARG LIST");
+                        }
+                    }
                 }
             }
+
+            if(m.type.equals(""))
+            {
+                throw new Exception("WRONG FUNCTION RETURN TYPE");
+            }
+
+            methods.put(method.value, m);
         }
 
         string.append(
@@ -79,7 +124,6 @@ public class ASCIICreator
         string.append(item.value);
         if(item.value.equals("main"))
         {
-            //TODO: what if real argc/argv ?
             string.append("([Ljava/lang/String;)V\n");
             Var mainArg = new Var();
             mainArg.name = "args";
@@ -89,16 +133,19 @@ public class ASCIICreator
         else
         {
             string.append("(");
-            String type = "undefined";
+            string.append(methods.get(item.value).args);
+            string.append(")");
+            string.append(methods.get(item.value).type);
+            string.append("\n");
+
             for(ParseTreeItem it : item.childrens)
             {
                 if(it.type == ParseTreeItem.ParseTreeItemType.TYPE)
                 {
-                    if(!methodType.containsKey(it.value))
+                    if(!methods.containsKey(item.value))
                     {
                         throw new Exception("METHOD NOT DEFINED");
                     }
-                    type = methodType.get(it.value);
                 }
                 if(it.type == ParseTreeItem.ParseTreeItemType.ARGLIST)
                 {
@@ -111,8 +158,8 @@ public class ASCIICreator
                                     && arg.childrens.get(1).type == ParseTreeItem.ParseTreeItemType.NAME)
                             {
                                 Var varArg = new Var();
-                                varArg.name = arg.childrens.get(0).value;
-                                varArg.type = arg.childrens.get(1).value;
+                                varArg.type = arg.childrens.get(0).value;
+                                varArg.name = arg.childrens.get(1).value;
                                 vars.put(vars.size(), varArg);
                             }
                             else
@@ -124,17 +171,9 @@ public class ASCIICreator
                         {
                             throw new Exception("WRONG ARG LIST");
                         }
-                        //TODO: ADD ARG LIST
                     }
                 }
             }
-            if(type.equals("undefined"))
-            {
-                throw new Exception("METHOD NOT DEFINED");
-            }
-            string.append(")");
-            string.append(type);
-            string.append("\n");
         }
 
         string.append("   .limit stack          ");
@@ -164,7 +203,7 @@ public class ASCIICreator
             }
         }
 
-        string.append(".end method\n");
+        string.append(".end method\n\n");
     }
 
     private void createBody(HashMap<Integer, Var> vars, ParseTreeItem item) throws Exception
@@ -213,6 +252,7 @@ public class ASCIICreator
                             case PLUS:
                             case NUMBER:
                             case NAME:
+                            case FUNCTION:
                             {
                                 calculate(vars, child);
                                 break;
@@ -225,6 +265,11 @@ public class ASCIICreator
                     string.append("   istore                ");
                     string.append(varId);
                     string.append("\n");
+                    break;
+                }
+                case FUNCTION:
+                {
+                    calculate(vars, it);
                     break;
                 }
                 case PRINT:
@@ -252,6 +297,9 @@ public class ASCIICreator
                             case DIVISION:
                             case MINUS:
                             case PLUS:
+                            case NUMBER:
+                            case NAME:
+                            case FUNCTION:
                             {
                                 calculate(vars, it);
                                 isReturnVal = true;
@@ -272,6 +320,23 @@ public class ASCIICreator
 
     private void calculate(HashMap<Integer, Var> vars, ParseTreeItem item) throws Exception
     {
+        if(item.type == ParseTreeItem.ParseTreeItemType.FUNCTION)
+        {
+            for(ParseTreeItem it : item.childrens)
+            {
+                calculate(vars, it);
+            }
+
+            string.append("   invokestatic          MainClass/");
+            string.append(item.value);
+            string.append("(");
+            string.append(methods.get(item.value).args);
+            string.append(")");
+            string.append(methods.get(item.value).type);
+            string.append("\n");
+            return;
+        }
+
         if(item.childrens.size() > 2)
         {
             return;
@@ -377,7 +442,13 @@ public class ASCIICreator
         public String type;
     }
 
-    private HashMap<String, String> methodType = new HashMap<>();
+    private class Method
+    {
+        public String type;
+        public String args;
+    }
+
+    private HashMap<String, Method> methods = new HashMap<>();
     private ParseTreeItem head;
     private StringBuilder string = new StringBuilder();
 }

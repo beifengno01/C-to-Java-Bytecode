@@ -29,16 +29,18 @@ public class CtoJavaBytecode
         try
         {
             Reader reader = new StringReader("//Hello World!\n" +
+                    "int fun(int a, int b)" +
+                    "{ return a + b; }" +
+                    "void fun2()\n" +
+                    "    {\n" +
+                    "    }" +
                     "int main()\n" +
                     "{\n" +
-                    "int a;\n" +
-                    "int b;\n" +
-                    "a = 5;\n" +
-                    "b = 6;\n" +
-                    "a = a + b - b / a * b;\n" +
-                    "/*comment\n" +
-                    "comment*/\n" +
-                    "print(a);\n" +
+                    "int z;\n" +
+                    "        z = 5;\n" +
+                    "        int a;" +
+                    "a = fun(10, z);\n" +
+                    "        fun2();" +
                     "return;\n" +
                     "}\n");
             Buffer buffer = new Buffer(reader, 256);

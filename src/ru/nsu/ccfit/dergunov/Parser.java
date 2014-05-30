@@ -121,6 +121,11 @@ public class Parser
 
         while(true)
         {
+            if(lastToken.getTokenType() == Token.TokenType.COMMA)
+            {
+                lastToken = lexer.getToken();
+            }
+
             ParseTreeItem itemType = parseType();
             if(itemType == null)
             {
@@ -173,7 +178,7 @@ public class Parser
             }
             else
             {
-                throw new Exception();
+                throw new Exception("SEMICOLON EXPECTED");
             }
         }
 
@@ -243,6 +248,44 @@ public class Parser
                     else
                     {
                         throw new Exception();
+                    }
+                }
+                else if(lastToken.getTokenType() == Token.TokenType.OPENBRACKET)
+                {
+                    item.type = ParseTreeItem.ParseTreeItemType.FUNCTION;
+
+                    lastToken = lexer.getToken();
+
+                    while(true)
+                    {
+                        ParseTreeItem newItem = parseExpression();
+
+                        if(newItem == null)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            item.childrens.add(newItem);
+
+                            if(lastToken.getTokenType() == Token.TokenType.COMMA)
+                            {
+                                lastToken = lexer.getToken();
+                                if(lastToken.getTokenType() == Token.TokenType.CLOSEBRACKET)
+                                {
+                                    throw new Exception();
+                                }
+                            }
+                        }
+                    }
+
+                    if(lastToken.getTokenType() == Token.TokenType.CLOSEBRACKET)
+                    {
+                        lastToken = lexer.getToken();
+                    }
+                    else
+                    {
+                        throw new Exception("CLOSEBRACKET expected");
                     }
                 }
             }
@@ -477,6 +520,8 @@ public class Parser
 
                 if(lastToken.getTokenType() == Token.TokenType.OPENBRACKET)
                 {
+                    item.type = ParseTreeItem.ParseTreeItemType.FUNCTION;
+
                     lastToken = lexer.getToken();
 
                     while(true)
