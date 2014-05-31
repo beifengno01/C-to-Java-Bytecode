@@ -61,7 +61,15 @@ public class Token
         INT,
         DOUBLE,
         VOID,
-        END
+        END,
+        WHILE,
+        IF,
+        LESS,
+        GREATER,
+        LESSEQUALS,
+        GREATEREQUALS,
+        DOUBLEEQUALS,
+        NOTEQUALS
     }
 
     private TokenType type;

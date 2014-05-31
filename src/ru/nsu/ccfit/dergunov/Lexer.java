@@ -84,6 +84,14 @@ public class Lexer
                 {
                     return voidToken;
                 }
+                else if(name.toString().equals("while"))
+                {
+                    return whileToken;
+                }
+                else if(name.toString().equals("if"))
+                {
+                    return ifToken;
+                }
                 else
                 {
                     Token token = new Token(Token.TokenType.NAME);
@@ -170,7 +178,38 @@ public class Lexer
                 }
                 case '=':
                 {
+                    if(buffer.peekChar() == '=')
+                    {
+                        buffer.getChar();
+                        return doubleEqualsToken;
+                    }
                     return equalsToken;
+                }
+                case '<':
+                {
+                    if(buffer.peekChar() == '=')
+                    {
+                        buffer.getChar();
+                        return lessEqualsToken;
+                    }
+                    return lessToken;
+                }
+                case '>':
+                {
+                    if(buffer.peekChar() == '=')
+                    {
+                        buffer.getChar();
+                        return greaterEqualsToken;
+                    }
+                    return greaterToken;
+                }
+                case '!':
+                {
+                    if(buffer.peekChar() == '=')
+                    {
+                        buffer.getChar();
+                        return notEqualsToken;
+                    }
                 }
             }
         }
@@ -257,6 +296,14 @@ public class Lexer
     private Token intToken = new Token(Token.TokenType.INT);
     private Token doubleToken = new Token(Token.TokenType.DOUBLE);
     private Token voidToken = new Token(Token.TokenType.VOID);
+    private Token whileToken = new Token(Token.TokenType.WHILE);
+    private Token ifToken = new Token(Token.TokenType.IF);
+    private Token lessToken = new Token(Token.TokenType.LESS);
+    private Token greaterToken = new Token(Token.TokenType.GREATER);
+    private Token lessEqualsToken = new Token(Token.TokenType.LESSEQUALS);
+    private Token greaterEqualsToken = new Token(Token.TokenType.GREATEREQUALS);
+    private Token doubleEqualsToken = new Token(Token.TokenType.DOUBLEEQUALS);
+    private Token notEqualsToken = new Token(Token.TokenType.NOTEQUALS);
     private Token endToken = new Token(Token.TokenType.END);
 
     private Buffer buffer;

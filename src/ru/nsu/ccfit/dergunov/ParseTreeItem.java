@@ -44,6 +44,14 @@ public class ParseTreeItem
         MINUS,
         NUMBER,
         NAME,
-        FUNCTION
+        FUNCTION,
+        WHILE,
+        IF,
+        LESS,
+        GREATER,
+        LESSEQUALS,
+        GREATEREQUALS,
+        DOUBLEEQUALS,
+        NOTEQUALS
     }
 }

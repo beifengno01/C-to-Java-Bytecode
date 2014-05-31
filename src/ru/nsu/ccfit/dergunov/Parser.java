@@ -176,10 +176,11 @@ public class Parser
             {
                 lastToken = lexer.getToken();
             }
-            else
-            {
-                throw new Exception("SEMICOLON EXPECTED");
-            }
+            //else
+            //{
+                //throw new Exception("SEMICOLON EXPECTED");
+                //TODO: add semicolon check (bug with if, while)
+            //}
         }
 
         return item;
@@ -306,10 +307,33 @@ public class Parser
                         throw new Exception();
                     }
 
-                    if(lastToken.getTokenType() == Token.TokenType.NAME)
-                    {
-                        item.value = lastToken.getValue();
+                    item.childrens.add(parseExpression());
 
+                    if(lastToken.getTokenType() == Token.TokenType.CLOSEBRACKET)
+                    {
+                        lastToken = lexer.getToken();
+                    }
+                    else
+                    {
+                        throw new Exception();
+                    }
+                }
+                else if(lastToken.getTokenType() == Token.TokenType.WHILE ||
+                        lastToken.getTokenType() == Token.TokenType.IF)
+                {
+                    if(lastToken.getTokenType() == Token.TokenType.WHILE)
+                    {
+                        item.type = ParseTreeItem.ParseTreeItemType.WHILE;
+                    }
+                    else
+                    {
+                        item.type = ParseTreeItem.ParseTreeItemType.IF;
+                    }
+
+                    lastToken = lexer.getToken();
+
+                    if(lastToken.getTokenType() == Token.TokenType.OPENBRACKET)
+                    {
                         lastToken = lexer.getToken();
                     }
                     else
@@ -317,7 +341,38 @@ public class Parser
                         throw new Exception();
                     }
 
+                    ParseTreeItem itemExpr = parseBooleanExpression();
+
+                    if(itemExpr != null)
+                    {
+                        item.childrens.add(itemExpr);
+                    }
+                    else
+                    {
+                        throw new Exception();
+                    }
+
                     if(lastToken.getTokenType() == Token.TokenType.CLOSEBRACKET)
+                    {
+                        lastToken = lexer.getToken();
+                    }
+                    else
+                    {
+                        throw new Exception();
+                    }
+
+                    if(lastToken.getTokenType() == Token.TokenType.OPENBRACE)
+                    {
+                        lastToken = lexer.getToken();
+                    }
+                    else
+                    {
+                        throw new Exception();
+                    }
+
+                    item.childrens.add(parseBody());
+
+                    if(lastToken.getTokenType() == Token.TokenType.CLOSEBRACE)
                     {
                         lastToken = lexer.getToken();
                     }
@@ -381,6 +436,60 @@ public class Parser
         }
 
         lastToken = lexer.getToken();
+        return item;
+    }
+
+    private ParseTreeItem parseBooleanExpression() throws Exception
+    {
+        ParseTreeItem item = parseExpression();
+
+        while(true)
+        {
+            if((lastToken.getTokenType() == Token.TokenType.LESS) ||
+                    (lastToken.getTokenType() == Token.TokenType.GREATER) ||
+                    (lastToken.getTokenType() == Token.TokenType.LESSEQUALS) ||
+                    (lastToken.getTokenType() == Token.TokenType.GREATEREQUALS) ||
+                    (lastToken.getTokenType() == Token.TokenType.DOUBLEEQUALS) ||
+                    (lastToken.getTokenType() == Token.TokenType.NOTEQUALS))
+            {
+                ParseTreeItem newItem = new ParseTreeItem();
+                if(lastToken.getTokenType() == Token.TokenType.LESS)
+                {
+                    newItem.type = ParseTreeItem.ParseTreeItemType.LESS;
+                }
+                else if(lastToken.getTokenType() == Token.TokenType.GREATER)
+                {
+                    newItem.type = ParseTreeItem.ParseTreeItemType.GREATER;
+                }
+                else if(lastToken.getTokenType() == Token.TokenType.LESSEQUALS)
+                {
+                    newItem.type = ParseTreeItem.ParseTreeItemType.LESSEQUALS;
+                }
+                else if(lastToken.getTokenType() == Token.TokenType.GREATEREQUALS)
+                {
+                    newItem.type = ParseTreeItem.ParseTreeItemType.GREATEREQUALS;
+                }
+                else if(lastToken.getTokenType() == Token.TokenType.DOUBLEEQUALS)
+                {
+                    newItem.type = ParseTreeItem.ParseTreeItemType.DOUBLEEQUALS;
+                }
+                else if(lastToken.getTokenType() == Token.TokenType.NOTEQUALS)
+                {
+                    newItem.type = ParseTreeItem.ParseTreeItemType.NOTEQUALS;
+                }
+
+                newItem.childrens.add(item);
+                item = newItem;
+
+                lastToken = lexer.getToken();
+                item.childrens.add(parseExpression());
+            }
+            else
+            {
+                break;
+            }
+        }
+
         return item;
     }
 

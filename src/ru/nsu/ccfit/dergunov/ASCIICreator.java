@@ -176,6 +176,10 @@ public class ASCIICreator
             }
         }
 
+        methodString = new StringBuilder();
+        stackCount = new StackSizeCounter();
+        localsCount = 0;
+
         for(ParseTreeItem it : item.childrens)
         {
             switch (it.type)
@@ -188,15 +192,25 @@ public class ASCIICreator
             }
         }
 
+        for(Map.Entry<Integer, Var> var : vars.entrySet())
+        {
+            localsCount += getVarSizeByType(var.getValue().type);
+        }
+
+        string.append("   .limit stack          ");
+        string.append(stackCount.getStackSize());
+        string.append("\n");
+        string.append("   .limit locals         ");
+        string.append(localsCount);
+        string.append("\n");
+
+        string.append(methodString);
+
         string.append(".end method\n\n");
     }
 
     private void createBody(HashMap<Integer, Var> vars, ParseTreeItem item) throws Exception
     {
-        int localsCount = 0;
-        StackSizeCounter stackCount = new StackSizeCounter();
-        StringBuilder methodString = new StringBuilder();
-
         for(ParseTreeItem it : item.childrens)
         {
             boolean isBreak = false;
@@ -246,7 +260,7 @@ public class ASCIICreator
                             case NAME:
                             case FUNCTION:
                             {
-                                calculate(vars, child, stackCount, methodString);
+                                calculate(vars, child);
                                 break;
                             }
                         }
@@ -263,20 +277,19 @@ public class ASCIICreator
                 }
                 case FUNCTION:
                 {
-                    calculate(vars, it, stackCount, methodString);
+                    calculate(vars, it);
                     break;
                 }
                 case PRINT:
                 {
-                    Integer varId = findVar(vars, it.value);
-
+                    if(it.childrens.size() == 0)
+                    {
+                        throw new Exception("EMPTY PRINT LIST");
+                    }
                     methodString.append("   getstatic             java/lang/System/out Ljava/io/PrintStream;\n");
-                    methodString.append("   iload                 ");
-                    methodString.append(varId);
-                    methodString.append("\n");
+                    calculate(vars, it.childrens.get(0));
                     methodString.append("   invokevirtual         java/io/PrintStream/println(");
-                    Var var = vars.get(varId);
-                    methodString.append(var.type);
+                    methodString.append("I"); // TODO: add double
                     methodString.append(")V\n");
                     break;
                 }
@@ -295,7 +308,7 @@ public class ASCIICreator
                             case NAME:
                             case FUNCTION:
                             {
-                                calculate(vars, it, stackCount, methodString);
+                                calculate(vars, it);
                                 isReturnVal = true;
                                 methodString.append("   ireturn\n");
                                 break;
@@ -310,6 +323,55 @@ public class ASCIICreator
                     isBreak = true;
                     break;
                 }
+                case WHILE:
+                {
+                    if(it.childrens.size() == 0)
+                    {
+                        throw new Exception("EMPTY CONDITION");
+                    }
+                    ++labelCount;
+                    int startLabel = labelCount;
+                    methodString.append("Label");
+                    methodString.append(startLabel);
+                    methodString.append(":\n");
+
+                    calculate(vars, it.childrens.get(0));
+
+                    int endLabel = labelCount;
+                    if(it.childrens.size() > 1)
+                    {
+                        createBody(vars, it.childrens.get(1));
+                    }
+
+                    methodString.append("   goto                  Label");
+                    methodString.append(startLabel);
+                    methodString.append("\n");
+
+                    methodString.append("Label");
+                    methodString.append(endLabel);
+                    methodString.append(":\n");
+
+                    break;
+                }
+                case IF:
+                {
+                    if(it.childrens.size() == 0)
+                    {
+                        throw new Exception("EMPTY CONDITION");
+                    }
+                    calculate(vars, it.childrens.get(0));
+
+                    int endLabel = labelCount;
+                    if(it.childrens.size() > 1)
+                    {
+                        createBody(vars, it.childrens.get(1));
+                    }
+                    methodString.append("Label");
+                    methodString.append(endLabel);
+                    methodString.append(":\n");
+
+                    break;
+                }
             }
 
             if(isBreak)
@@ -317,29 +379,15 @@ public class ASCIICreator
                 break;
             }
         }
-
-        for(Map.Entry<Integer, Var> var : vars.entrySet())
-        {
-            localsCount += getVarSizeByType(var.getValue().type);
-        }
-
-        string.append("   .limit stack          ");
-        string.append(stackCount.getStackSize());
-        string.append("\n");
-        string.append("   .limit locals         ");
-        string.append(localsCount);
-        string.append("\n");
-
-        string.append(methodString);
     }
 
-    private void calculate(HashMap<Integer, Var> vars, ParseTreeItem item ,StackSizeCounter stackCount,StringBuilder methodString) throws Exception
+    private void calculate(HashMap<Integer, Var> vars, ParseTreeItem item) throws Exception
     {
         if(item.type == ParseTreeItem.ParseTreeItemType.FUNCTION)
         {
             for(ParseTreeItem it : item.childrens)
             {
-                calculate(vars, it, stackCount, methodString);
+                calculate(vars, it);
             }
 
             methodString.append("   invokestatic          MainClass/");
@@ -366,11 +414,11 @@ public class ASCIICreator
 
         if(item.childrens.size() >= 1)
         {
-            calculate(vars, item.childrens.get(0), stackCount, methodString);
+            calculate(vars, item.childrens.get(0));
         }
         if(item.childrens.size() >= 2)
         {
-            calculate(vars, item.childrens.get(1), stackCount, methodString);
+            calculate(vars, item.childrens.get(1));
         }
 
         switch (item.type)
@@ -412,6 +460,72 @@ public class ASCIICreator
             case MINUS:
             {
                 methodString.append("   isub                  \n");
+                stackCount.sub(getVarSizeByType("I")); //TODO: add double
+                break;
+            }
+            case LESS:
+            {
+                methodString.append("   isub                  \n");
+                stackCount.sub(getVarSizeByType("I")); //TODO: add double
+                ++labelCount;
+                methodString.append("   ifge                  Label");
+                methodString.append(labelCount);
+                methodString.append("\n");
+                stackCount.sub(getVarSizeByType("I")); //TODO: add double
+                break;
+            }
+            case GREATER:
+            {
+                methodString.append("   isub                  \n");
+                stackCount.sub(getVarSizeByType("I")); //TODO: add double
+                ++labelCount;
+                methodString.append("   ifle                  Label");
+                methodString.append(labelCount);
+                methodString.append("\n");
+                stackCount.sub(getVarSizeByType("I")); //TODO: add double
+                break;
+            }
+            case LESSEQUALS:
+            {
+                methodString.append("   isub                  \n");
+                stackCount.sub(getVarSizeByType("I")); //TODO: add double
+                ++labelCount;
+                methodString.append("   ifgt                  Label");
+                methodString.append(labelCount);
+                methodString.append("\n");
+                stackCount.sub(getVarSizeByType("I")); //TODO: add double
+                break;
+            }
+            case GREATEREQUALS:
+            {
+                methodString.append("   isub                  \n");
+                stackCount.sub(getVarSizeByType("I")); //TODO: add double
+                ++labelCount;
+                methodString.append("   iflt                  Label");
+                methodString.append(labelCount);
+                methodString.append("\n");
+                stackCount.sub(getVarSizeByType("I")); //TODO: add double
+                break;
+            }
+            case DOUBLEEQUALS:
+            {
+                methodString.append("   isub                  \n");
+                stackCount.sub(getVarSizeByType("I")); //TODO: add double
+                ++labelCount;
+                methodString.append("   ifeq                  Label");
+                methodString.append(labelCount);
+                methodString.append("\n");
+                stackCount.sub(getVarSizeByType("I")); //TODO: add double
+                break;
+            }
+            case NOTEQUALS:
+            {
+                methodString.append("   isub                  \n");
+                stackCount.sub(getVarSizeByType("I")); //TODO: add double
+                ++labelCount;
+                methodString.append("   ifne                  Label");
+                methodString.append(labelCount);
+                methodString.append("\n");
                 stackCount.sub(getVarSizeByType("I")); //TODO: add double
                 break;
             }
@@ -503,6 +617,11 @@ public class ASCIICreator
     private HashMap<String, Method> methods = new HashMap<>();
     private ParseTreeItem head;
     private StringBuilder string = new StringBuilder();
+    private int labelCount = 0;
+
+    int localsCount = 0;
+    StackSizeCounter stackCount = new StackSizeCounter();
+    StringBuilder methodString = new StringBuilder();
 }
 
 class StackSizeCounter
