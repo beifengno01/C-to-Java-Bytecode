@@ -19,8 +19,8 @@
 
 package ru.nsu.ccfit.dergunov;
 
+import java.io.FileReader;
 import java.io.Reader;
-import java.io.StringReader;
 
 public class CtoJavaBytecode
 {
@@ -28,21 +28,7 @@ public class CtoJavaBytecode
     {
         try
         {
-            Reader reader = new StringReader("//Hello World!\n" +
-                    "int fun(int a, int b)" +
-                    "{ return a + b; }" +
-                    "void fun2()\n" +
-                    "    {\n" +
-                    "    }" +
-                    "int main()\n" +
-                    "{\n" +
-                    "int z;\n" +
-                    "        z = 5;\n" +
-                    "        int a;" +
-                    "a = fun(10, z);\n" +
-                    "        fun2();" +
-                    "return;\n" +
-                    "}\n");
+            Reader reader = new FileReader("resources/example.c");
             Buffer buffer = new Buffer(reader, 256);
             Lexer lexer = new Lexer(buffer);
             Parser parser = new Parser(lexer);

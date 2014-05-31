@@ -107,7 +107,7 @@ public class ASCIICreator
                 "   aload_0               \n" +
                 "   invokespecial         java/lang/Object/<init>()V\n" +
                 "   return                \n" +
-                ".end method              \n"
+                ".end method              \n\n"
         );
 
         for(ParseTreeItem method : item.childrens)
