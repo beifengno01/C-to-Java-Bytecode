@@ -127,7 +127,7 @@ public class ASCIICreator
             string.append("([Ljava/lang/String;)V\n");
             Var mainArg = new Var();
             mainArg.name = "args";
-            mainArg.type = "void";
+            mainArg.type = "[Ljava/lang/String;";
             vars.put(vars.size(), mainArg);
         }
         else
@@ -158,7 +158,7 @@ public class ASCIICreator
                                     && arg.childrens.get(1).type == ParseTreeItem.ParseTreeItemType.NAME)
                             {
                                 Var varArg = new Var();
-                                varArg.type = arg.childrens.get(0).value;
+                                varArg.type = getShortType(arg.childrens.get(0).value);
                                 varArg.name = arg.childrens.get(1).value;
                                 vars.put(vars.size(), varArg);
                             }
@@ -176,25 +176,10 @@ public class ASCIICreator
             }
         }
 
-        string.append("   .limit stack          ");
-        string.append(10); //TODO: CALC STACK SIZE
-        string.append("\n");
-        string.append("   .limit locals         ");
-        string.append(10); //TODO: CALC LOCALS LIMIT
-        string.append("\n");
-
         for(ParseTreeItem it : item.childrens)
         {
             switch (it.type)
             {
-                case TYPE:
-                {
-                    break;
-                }
-                case ARGLIST:
-                {
-                    break;
-                }
                 case BODY:
                 {
                     createBody(vars, it);
@@ -208,14 +193,19 @@ public class ASCIICreator
 
     private void createBody(HashMap<Integer, Var> vars, ParseTreeItem item) throws Exception
     {
+        int localsCount = 0;
+        StackSizeCounter stackCount = new StackSizeCounter();
+        StringBuilder methodString = new StringBuilder();
+
         for(ParseTreeItem it : item.childrens)
         {
+            boolean isBreak = false;
+
             switch(it.type)
             {
                 case DEFINE:
                 {
                     Var var = new Var();
-                    vars.put(vars.size(), var);
 
                     for(ParseTreeItem child : it.childrens)
                     {
@@ -223,7 +213,7 @@ public class ASCIICreator
                         {
                             case TYPE:
                             {
-                                var.type = child.value;
+                                var.type = getShortType(child.value);
                                 break;
                             }
                             case NAME:
@@ -233,6 +223,8 @@ public class ASCIICreator
                             }
                         }
                     }
+
+                    vars.put(vars.size(), var);
                     break;
                 }
                 case INITIALIZE:
@@ -254,7 +246,7 @@ public class ASCIICreator
                             case NAME:
                             case FUNCTION:
                             {
-                                calculate(vars, child);
+                                calculate(vars, child, stackCount, methodString);
                                 break;
                             }
                         }
@@ -262,28 +254,30 @@ public class ASCIICreator
 
                     Integer varId = findVar(vars, name);
 
-                    string.append("   istore                ");
-                    string.append(varId);
-                    string.append("\n");
+                    methodString.append("   istore                ");
+                    stackCount.sub(getVarSize(vars, varId));
+                    methodString.append(varId);
+                    methodString.append("\n");
+
                     break;
                 }
                 case FUNCTION:
                 {
-                    calculate(vars, it);
+                    calculate(vars, it, stackCount, methodString);
                     break;
                 }
                 case PRINT:
                 {
                     Integer varId = findVar(vars, it.value);
 
-                    string.append("   getstatic             java/lang/System/out Ljava/io/PrintStream;\n");
-                    string.append("   iload                 ");
-                    string.append(varId);
-                    string.append("\n");
-                    string.append("   invokevirtual         java/io/PrintStream/println(");
+                    methodString.append("   getstatic             java/lang/System/out Ljava/io/PrintStream;\n");
+                    methodString.append("   iload                 ");
+                    methodString.append(varId);
+                    methodString.append("\n");
+                    methodString.append("   invokevirtual         java/io/PrintStream/println(");
                     Var var = vars.get(varId);
-                    string.append(getShortType(var.type));
-                    string.append(")V\n");
+                    methodString.append(var.type);
+                    methodString.append(")V\n");
                     break;
                 }
                 case RETURN:
@@ -301,39 +295,67 @@ public class ASCIICreator
                             case NAME:
                             case FUNCTION:
                             {
-                                calculate(vars, it);
+                                calculate(vars, it, stackCount, methodString);
                                 isReturnVal = true;
-                                string.append("   ireturn\n");
+                                methodString.append("   ireturn\n");
                                 break;
                             }
                         }
                     }
                     if(!isReturnVal)
                     {
-                        string.append("   return\n");
+                        methodString.append("   return\n");
                     }
-                    return;
+
+                    isBreak = true;
+                    break;
                 }
             }
+
+            if(isBreak)
+            {
+                break;
+            }
         }
+
+        for(Map.Entry<Integer, Var> var : vars.entrySet())
+        {
+            localsCount += getVarSizeByType(var.getValue().type);
+        }
+
+        string.append("   .limit stack          ");
+        string.append(stackCount.getStackSize());
+        string.append("\n");
+        string.append("   .limit locals         ");
+        string.append(localsCount);
+        string.append("\n");
+
+        string.append(methodString);
     }
 
-    private void calculate(HashMap<Integer, Var> vars, ParseTreeItem item) throws Exception
+    private void calculate(HashMap<Integer, Var> vars, ParseTreeItem item ,StackSizeCounter stackCount,StringBuilder methodString) throws Exception
     {
         if(item.type == ParseTreeItem.ParseTreeItemType.FUNCTION)
         {
             for(ParseTreeItem it : item.childrens)
             {
-                calculate(vars, it);
+                calculate(vars, it, stackCount, methodString);
             }
 
-            string.append("   invokestatic          MainClass/");
-            string.append(item.value);
-            string.append("(");
-            string.append(methods.get(item.value).args);
-            string.append(")");
-            string.append(methods.get(item.value).type);
-            string.append("\n");
+            methodString.append("   invokestatic          MainClass/");
+            methodString.append(item.value);
+            methodString.append("(");
+            String methodArgs = methods.get(item.value).args;
+            methodString.append(methodArgs);
+            for(int i = 0; i < methodArgs.length(); ++i)
+            {
+                stackCount.sub(getVarSizeByType(String.valueOf(methodArgs.charAt(i))));
+            }
+            methodString.append(")");
+            String methodType = methods.get(item.value).type;
+            methodString.append(methodType);
+            stackCount.add(getVarSizeByType(methodType));
+            methodString.append("\n");
             return;
         }
 
@@ -344,47 +366,53 @@ public class ASCIICreator
 
         if(item.childrens.size() >= 1)
         {
-            calculate(vars, item.childrens.get(0));
+            calculate(vars, item.childrens.get(0), stackCount, methodString);
         }
         if(item.childrens.size() >= 2)
         {
-            calculate(vars, item.childrens.get(1));
+            calculate(vars, item.childrens.get(1), stackCount, methodString);
         }
 
         switch (item.type)
         {
             case NAME:
             {
-                string.append("   iload                 ");
-                string.append(findVar(vars, item.value));
-                string.append("\n");
+                methodString.append("   iload                 ");
+                stackCount.add(getVarSize(vars, item.value));
+                methodString.append(findVar(vars, item.value));
+                methodString.append("\n");
                 break;
             }
             case NUMBER:
             {
-                string.append("   bipush                ");
-                string.append(item.value);
-                string.append("\n");
+                methodString.append("   bipush                ");
+                stackCount.add(getVarSizeByType("I")); //TODO: add double
+                methodString.append(item.value);
+                methodString.append("\n");
                 break;
             }
             case MULTIPLICATION:
             {
-                string.append("   imul                  \n");
+                methodString.append("   imul                  \n");
+                stackCount.sub(getVarSizeByType("I")); //TODO: add double
                 break;
             }
             case DIVISION:
             {
-                string.append("   idiv                  \n");
+                methodString.append("   idiv                  \n");
+                stackCount.sub(getVarSizeByType("I")); //TODO: add double
                 break;
             }
             case PLUS:
             {
-                string.append("   iadd                  \n");
+                methodString.append("   iadd                  \n");
+                stackCount.sub(getVarSizeByType("I")); //TODO: add double
                 break;
             }
             case MINUS:
             {
-                string.append("   isub                  \n");
+                methodString.append("   isub                  \n");
+                stackCount.sub(getVarSizeByType("I")); //TODO: add double
                 break;
             }
         }
@@ -411,6 +439,30 @@ public class ASCIICreator
         }
 
         return varId;
+    }
+
+    private int getVarSize(HashMap<Integer, Var> vars, int id) throws Exception
+    {
+        return getVarSizeByType(vars.get(id).type);
+    }
+
+    private int getVarSize(HashMap<Integer, Var> vars, String name) throws Exception
+    {
+        return getVarSizeByType(vars.get(findVar(vars, name)).type);
+    }
+
+    private int getVarSizeByType(String type)
+    {
+        if(type.equals("V"))
+        {
+            return 0;
+        }
+        else if(type.equals("D"))
+        {
+            return 2;
+        }
+
+        return 1;
     }
 
     private String getShortType(String type) throws Exception
@@ -451,4 +503,29 @@ public class ASCIICreator
     private HashMap<String, Method> methods = new HashMap<>();
     private ParseTreeItem head;
     private StringBuilder string = new StringBuilder();
+}
+
+class StackSizeCounter
+{
+    public int getStackSize()
+    {
+        return max;
+    }
+
+    public void add(int size)
+    {
+        count += size;
+        if (count > max)
+        {
+            max = count;
+        }
+    }
+
+    public void sub(int size)
+    {
+        count -= size;
+    }
+
+    private int count = 0;
+    private int max = 0;
 }
