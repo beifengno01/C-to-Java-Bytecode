@@ -20,20 +20,30 @@
 package ru.nsu.ccfit.dergunov;
 
 import java.io.FileReader;
+import java.io.PrintWriter;
 import java.io.Reader;
 
 public class CtoJavaBytecode
 {
     public static void main(String[] args)
     {
+        if(args.length < 2)
+        {
+            System.out.println("Wrong arguments");
+            return;
+        }
+
         try
         {
-            Reader reader = new FileReader("resources/example.c");
+            Reader reader = new FileReader(args[0]);
             Buffer buffer = new Buffer(reader, 256);
             Lexer lexer = new Lexer(buffer);
             Parser parser = new Parser(lexer);
             ASCIICreator creator = new ASCIICreator(parser.parseProgram());
-            System.out.println(creator.create());
+
+            PrintWriter writer = new PrintWriter(args[1], "UTF-8");
+            writer.write(creator.create());
+            writer.close();
         }
         catch(Exception ex)
         {
