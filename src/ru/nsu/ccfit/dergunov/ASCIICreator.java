@@ -120,10 +120,13 @@ public class ASCIICreator
     {
         HashMap<Integer, Var> vars = new HashMap<>();
 
+        String retType = "V";
+
         string.append(".method                  public static ");
         string.append(item.value);
         if(item.value.equals("main"))
         {
+            retType = "V";
             string.append("([Ljava/lang/String;)V\n");
             Var mainArg = new Var();
             mainArg.name = "args";
@@ -132,6 +135,7 @@ public class ASCIICreator
         }
         else
         {
+            retType = methods.get(item.value).type;
             string.append("(");
             string.append(methods.get(item.value).args);
             string.append(")");
@@ -206,6 +210,14 @@ public class ASCIICreator
 
         string.append(methodString);
 
+        if(retType.equals("V"))
+        {
+            string.append("   return\n");
+        }
+        else
+        {
+            string.append("   ireturn\n");
+        }
         string.append(".end method\n\n");
     }
 
@@ -310,14 +322,9 @@ public class ASCIICreator
                             {
                                 calculate(vars, it);
                                 isReturnVal = true;
-                                methodString.append("   ireturn\n");
                                 break;
                             }
                         }
-                    }
-                    if(!isReturnVal)
-                    {
-                        methodString.append("   return\n");
                     }
 
                     isBreak = true;
@@ -376,7 +383,7 @@ public class ASCIICreator
 
             if(isBreak)
             {
-                break;
+                return;
             }
         }
     }
