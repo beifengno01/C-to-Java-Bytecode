@@ -76,12 +76,12 @@ public class ASCIICreator
                             }
                             else
                             {
-                                throw new Exception("WRONG ARG LIST");
+                                throw new Exception("Wrong arg list");
                             }
                         }
                         else
                         {
-                            throw new Exception("WRONG ARG LIST");
+                            throw new Exception("Wrong arg list");
                         }
                     }
                 }
@@ -89,7 +89,7 @@ public class ASCIICreator
 
             if(m.type.equals(""))
             {
-                throw new Exception("WRONG FUNCTION RETURN TYPE");
+                throw new Exception("Wrong function return type");
             }
 
             methods.put(method.value, m);
@@ -120,7 +120,7 @@ public class ASCIICreator
     {
         HashMap<Integer, Var> vars = new HashMap<>();
 
-        string.append("method                  public static ");
+        string.append(".method                  public static ");
         string.append(item.value);
         if(item.value.equals("main"))
         {
@@ -144,7 +144,7 @@ public class ASCIICreator
                 {
                     if(!methods.containsKey(item.value))
                     {
-                        throw new Exception("METHOD NOT DEFINED");
+                        throw new Exception("Method not defined");
                     }
                 }
                 if(it.type == ParseTreeItem.ParseTreeItemType.ARGLIST)
@@ -164,12 +164,12 @@ public class ASCIICreator
                             }
                             else
                             {
-                                throw new Exception("WRONG ARG LIST");
+                                throw new Exception("Wrong arg list");
                             }
                         }
                         else
                         {
-                            throw new Exception("WRONG ARG LIST");
+                            throw new Exception("Wrong arg list");
                         }
                     }
                 }
@@ -246,7 +246,7 @@ public class ASCIICreator
                     String name = it.value;
                     if(it.childrens.size() == 0)
                     {
-                        throw new Exception("VAR INITIALIZE LIST IS EMPTY");
+                        throw new Exception("Var initialize list is empty");
                     }
                     for(ParseTreeItem child : it.childrens)
                     {
@@ -327,7 +327,7 @@ public class ASCIICreator
                 {
                     if(it.childrens.size() == 0)
                     {
-                        throw new Exception("EMPTY CONDITION");
+                        throw new Exception("Empty condition");
                     }
                     ++labelCount;
                     int startLabel = labelCount;
@@ -357,7 +357,7 @@ public class ASCIICreator
                 {
                     if(it.childrens.size() == 0)
                     {
-                        throw new Exception("EMPTY CONDITION");
+                        throw new Exception("Empty condition");
                     }
                     calculate(vars, it.childrens.get(0));
 
@@ -549,7 +549,7 @@ public class ASCIICreator
 
         if(var == null || varId == null)
         {
-            throw new Exception("VAR NOT FOUND");
+            throw new Exception("Var not found");
         }
 
         return varId;
@@ -597,7 +597,7 @@ public class ASCIICreator
             }
             default:
             {
-                throw new Exception("WRONG TYPE");
+                throw new Exception("Wrong type");
             }
         }
     }

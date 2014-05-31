@@ -68,7 +68,7 @@ public class Parser
         }
         else
         {
-            throw new Exception();
+            throw new Exception("Method name expected");
         }
 
         if(lastToken.getTokenType() == Token.TokenType.OPENBRACKET)
@@ -77,7 +77,7 @@ public class Parser
         }
         else
         {
-            throw new Exception();
+            throw new Exception("Open bracket expected");
         }
 
         item.childrens.add(parseArgList());
@@ -88,7 +88,7 @@ public class Parser
         }
         else
         {
-            throw new Exception();
+            throw new Exception("Close bracket expected");
         }
 
         if(lastToken.getTokenType() == Token.TokenType.OPENBRACE)
@@ -97,7 +97,7 @@ public class Parser
         }
         else
         {
-            throw new Exception();
+            throw new Exception("Open brace expected");
         }
 
         item.childrens.add(parseBody());
@@ -108,7 +108,7 @@ public class Parser
         }
         else
         {
-            throw new Exception();
+            throw new Exception("Close brace expected");
         }
 
         return item;
@@ -149,7 +149,7 @@ public class Parser
             }
             else
             {
-                throw new Exception();
+                throw new Exception("Var name expected");
             }
         }
 
@@ -224,7 +224,7 @@ public class Parser
             }
             else
             {
-                throw new Exception();
+                throw new Exception("Var name expected");
             }
         }
         else
@@ -274,7 +274,7 @@ public class Parser
                                 lastToken = lexer.getToken();
                                 if(lastToken.getTokenType() == Token.TokenType.CLOSEBRACKET)
                                 {
-                                    throw new Exception();
+                                    throw new Exception("Var name expected");
                                 }
                             }
                         }
@@ -286,7 +286,7 @@ public class Parser
                     }
                     else
                     {
-                        throw new Exception("CLOSEBRACKET expected");
+                        throw new Exception("Close bracket expected");
                     }
                 }
             }
@@ -304,7 +304,7 @@ public class Parser
                     }
                     else
                     {
-                        throw new Exception();
+                        throw new Exception("Open bracket expected");
                     }
 
                     item.childrens.add(parseExpression());
@@ -315,7 +315,7 @@ public class Parser
                     }
                     else
                     {
-                        throw new Exception();
+                        throw new Exception("Close bracket expected");
                     }
                 }
                 else if(lastToken.getTokenType() == Token.TokenType.WHILE ||
@@ -338,7 +338,7 @@ public class Parser
                     }
                     else
                     {
-                        throw new Exception();
+                        throw new Exception("Open bracket expected");
                     }
 
                     ParseTreeItem itemExpr = parseBooleanExpression();
@@ -358,7 +358,7 @@ public class Parser
                     }
                     else
                     {
-                        throw new Exception();
+                        throw new Exception("Close bracket expected");
                     }
 
                     if(lastToken.getTokenType() == Token.TokenType.OPENBRACE)
@@ -367,7 +367,7 @@ public class Parser
                     }
                     else
                     {
-                        throw new Exception();
+                        throw new Exception("Open brace expected");
                     }
 
                     item.childrens.add(parseBody());
@@ -378,7 +378,7 @@ public class Parser
                     }
                     else
                     {
-                        throw new Exception();
+                        throw new Exception("Close brace expected");
                     }
                 }
                 else
@@ -606,7 +606,7 @@ public class Parser
 
                 if(lastToken.getTokenType() != Token.TokenType.CLOSEBRACKET)
                 {
-                    throw new Exception();
+                    throw new Exception("Close bracket expected");
                 }
 
                 lastToken = lexer.getToken();
@@ -650,7 +650,7 @@ public class Parser
                                 lastToken = lexer.getToken();
                                 if(lastToken.getTokenType() == Token.TokenType.CLOSEBRACKET)
                                 {
-                                    throw new Exception();
+                                    throw new Exception("Var name expected");
                                 }
                             }
                         }
@@ -662,7 +662,7 @@ public class Parser
                     }
                     else
                     {
-                        throw new Exception();
+                        throw new Exception("Close bracket expected");
                     }
                 }
                 break;
